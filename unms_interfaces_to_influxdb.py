@@ -17,7 +17,7 @@ if response is not None:
             interfaces = response
 
             for interface in interfaces:
-                if device['identification']['site'] is not None:
+                if device['identification']['site'] is not None and device['identification']['model'] != 'UNKNOWN':
                     influx_interface = {
                         "measurement": "interface",
                         "tags": {
