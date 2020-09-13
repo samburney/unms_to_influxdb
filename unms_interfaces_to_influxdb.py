@@ -7,11 +7,18 @@ from config import config
 
 api = unms_api(config['api_url'], config['api_key'])
 
-influx_interfaces = []
+influx_client = influxdb.InfluxDBClient(
+    host=config['influxdb_host'],
+    username=config['influxdb_user'],
+    password=config['influxdb_pass'],
+    database=config['influxdb_db'],
+)
+
 response = api.do_request('devices')
 if response is not None:
     devices = response
     for device in devices:
+        influx_interfaces = []
         response = api.do_request(f"devices/{device['identification']['id']}/interfaces")
         if response is not None:
             interfaces = response
@@ -36,11 +43,5 @@ if response is not None:
                     }
                     influx_interfaces.append(influx_interface)
 
-if len(influx_interfaces) > 0:
-    influx_client = influxdb.InfluxDBClient(
-        host=config['influxdb_host'],
-        username=config['influxdb_user'],
-        password=config['influxdb_pass'],
-        database=config['influxdb_db'],
-    )
-    influx_client.write_points(influx_interfaces)
+        if len(influx_interfaces) > 0:
+            influx_client.write_points(influx_interfaces)
